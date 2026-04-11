@@ -2,51 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\TodolistService;
+use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
-class TodolistController extends Controller
+class UserController extends Controller
 {
+    private UserService $userService;
 
-    private TodolistService $todolistService;
-
-    public function __construct(TodolistService $todolistService)
+    /**
+     * @param UserService $userService
+     */
+    public function __construct(UserService $userService)
     {
-        $this->todolistService = $todolistService;
+        $this->userService = $userService;
     }
 
-    public function todoList(Request $request)
+    public function login(): Response
     {
-        $todolist = $this->todolistService->getTodolist();
-        return response()->view("todolist.todolist", [
-            "title" => "Todolist",
-            "todolist" => $todolist
-        ]);
+        return response()
+            ->view("user.login", [
+                "title" => "Login"
+            ]);
     }
 
-    public function addTodo(Request $request)
+    public function doLogin(Request $request): Response|RedirectResponse
     {
-        $todo = $request->input("todo");
+        $user = $request->input('user');
+        $password = $request->input('password');
 
-        if (empty($todo)) {
-            $todolist = $this->todolistService->getTodolist();
-            return response()->view("todolist.todolist", [
-                "title" => "Todolist",
-                "todolist" => $todolist,
-                "error" => "Todo is required"
+        // validate input
+        if (empty($user) || empty($password)) {
+            return response()->view("user.login", [
+                "title" => "Login",
+                "error" => "User or password is required"
             ]);
         }
 
-        $this->todolistService->saveTodo(uniqid(), $todo);
+        if ($this->userService->login($user, $password)) {
+            $request->session()->put("user", $user);
+            return redirect("/");
+        }
 
-        return redirect()->action([TodolistController::class, 'todoList']);
+        return response()->view("user.login", [
+            "title" => "Login",
+            "error" => "User or password is wrong"
+        ]);
     }
 
-    public function removeTodo(Request $request, string $todoId): RedirectResponse
+    public function doLogout(Request $request): RedirectResponse
     {
-        $this->todolistService->removeTodo($todoId);
-        return redirect()->action([TodolistController::class, 'todoList']);
+        $request->session()->forget("user");
+        return redirect("/");
     }
-
 }
