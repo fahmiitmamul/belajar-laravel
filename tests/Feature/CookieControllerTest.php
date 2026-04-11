@@ -12,7 +12,7 @@ test('Test Get Cookie', function () {
     ->withCookie("Is-Member", "true")
     ->get('/cookie/get')
     ->assertJson([
-        "User-Id" => "khannedy",
-        "IsMember" => "true"
+        "userId" => "khannedy",
+        "isMember" => "true"
     ]);
 });
