@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'contoh' => \App\Http\Middleware\ContohMiddleware::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+        'file/upload',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
