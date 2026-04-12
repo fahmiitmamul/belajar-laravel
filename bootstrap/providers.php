@@ -2,6 +2,7 @@
 
 return [
     App\Providers\AppServiceProvider::class,
+    App\Providers\FooBarServiceProvider::class,
     App\Providers\TodolistServiceProvider::class,
     App\Providers\UserServiceProvider::class,
 ];
