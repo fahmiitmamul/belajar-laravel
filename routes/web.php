@@ -164,4 +164,8 @@ Route::controller(\App\Http\Controllers\TodolistController::class)
         Route::get('/todolist', 'todoList');
         Route::post('/todolist', 'addTodo');
         Route::post('/todolist/{id}/delete', 'removeTodo');
-    });
+});
+
+Route::get('/html-encoding', function (\Illuminate\Http\Request $request){
+    return view("html-encoding", ["name" => $request->input("name")]);
+});
