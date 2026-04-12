@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [\App\Http\Controllers\HomeController::class, 'home']);
+
+Route::view('/template', 'template');
 
 Route::get('/pzn', function (){
     return "Hello Programmer Zaman Now";
@@ -152,8 +152,6 @@ Route::get('/abort/401', function (){
 Route::get('/abort/500', function (){
     abort(500);
 });
-
-Route::view('/template', 'template');
 
 Route::controller(\App\Http\Controllers\UserController::class)->group(function () {
     Route::get('/login', 'login')->middleware([\App\Http\Middleware\OnlyGuestMiddleware::class]);
