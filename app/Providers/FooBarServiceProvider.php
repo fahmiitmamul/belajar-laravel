@@ -20,11 +20,11 @@ class FooBarServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
-        $this->app->singleton(Foo::class, function ($app) {
-            return new Foo();
+        $this->app->bind(Foo::class, function ($app) {
+        return new Foo();
         });
-        $this->app->singleton(Bar::class, function ($app){
-            return new Bar($app->make(Foo::class));
+        $this->app->bind(Bar::class, function ($app){
+        return new Bar($app->make(Foo::class));
         });
     }
 
