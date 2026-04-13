@@ -6,5 +6,3 @@ CREATE TABLE categories (
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
-
-CREATE DATABASE belajar_laravel_test;
