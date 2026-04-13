@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 beforeEach(function () {
     DB::delete('delete from categories');
 });
 
-test('Test Insert', function () {
+test('insert', function () {
     DB::table("categories")->insert([
         "id" => "GADGET",
         "name" => 'Gadget'
@@ -18,17 +19,43 @@ test('Test Insert', function () {
     ]);
 
     $result = DB::select("select count(id) as total from categories");
+
     self::assertEquals(2, $result[0]->total);
 });
 
+test('select', function () {
+    DB::table("categories")->insert([
+        ["id" => "GADGET", "name" => "Gadget"],
+        ["id" => "FOOD", "name" => "Food"],
+    ]);
 
-test('Test Select', function () {
-    $this->testInsert();
+    $collection = DB::table("categories")
+        ->select(["id", "name"])
+        ->get();
 
-    $collection = DB::table("categories")->select(["id", "name"])->get();
-    self::assertNotNull($collection);
+    expect($collection)->not->toBeNull();
 
-    $collection->each(function ($item){
+    $collection->each(fn ($item) => Log::info(json_encode($item)));
+});
+
+test('where', function () {
+    DB::table("categories")->insert([
+        ["id" => "SMARTPHONE", "name" => "Smartphone"],
+        ["id" => "LAPTOP", "name" => "Laptop"],
+        ["id" => "FOOD", "name" => "Food"],
+    ]);
+
+    $collection = DB::table("categories")
+        ->where(function ($builder) {
+            $builder->where('id', '=', 'SMARTPHONE');
+            $builder->orWhere('id', '=', 'LAPTOP');
+        })
+        ->get();
+
+    self::assertCount(2, $collection);
+
+    $collection->each(function ($item) {
         Log::info(json_encode($item));
     });
 });
+
