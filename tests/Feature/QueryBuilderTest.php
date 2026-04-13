@@ -8,29 +8,29 @@ beforeEach(function () {
 });
 
 test('insert', function () {
-    DB::table("categories")->insert([
-        "id" => "GADGET",
-        "name" => 'Gadget'
+    DB::table('categories')->insert([
+        'id' => 'GADGET',
+        'name' => 'Gadget',
     ]);
 
-    DB::table("categories")->insert([
-        "id" => "FOOD",
-        "name" => 'Food'
+    DB::table('categories')->insert([
+        'id' => 'FOOD',
+        'name' => 'Food',
     ]);
 
-    $result = DB::select("select count(id) as total from categories");
+    $result = DB::select('select count(id) as total from categories');
 
     self::assertEquals(2, $result[0]->total);
 });
 
 test('select', function () {
-    DB::table("categories")->insert([
-        ["id" => "GADGET", "name" => "Gadget"],
-        ["id" => "FOOD", "name" => "Food"],
+    DB::table('categories')->insert([
+        ['id' => 'GADGET', 'name' => 'Gadget'],
+        ['id' => 'FOOD', 'name' => 'Food'],
     ]);
 
-    $collection = DB::table("categories")
-        ->select(["id", "name"])
+    $collection = DB::table('categories')
+        ->select(['id', 'name'])
         ->get();
 
     expect($collection)->not->toBeNull();
@@ -39,13 +39,13 @@ test('select', function () {
 });
 
 test('where', function () {
-    DB::table("categories")->insert([
-        ["id" => "SMARTPHONE", "name" => "Smartphone"],
-        ["id" => "LAPTOP", "name" => "Laptop"],
-        ["id" => "FOOD", "name" => "Food"],
+    DB::table('categories')->insert([
+        ['id' => 'SMARTPHONE', 'name' => 'Smartphone'],
+        ['id' => 'LAPTOP', 'name' => 'Laptop'],
+        ['id' => 'FOOD', 'name' => 'Food'],
     ]);
 
-    $collection = DB::table("categories")
+    $collection = DB::table('categories')
         ->where(function ($builder) {
             $builder->where('id', '=', 'SMARTPHONE');
             $builder->orWhere('id', '=', 'LAPTOP');
@@ -54,6 +54,17 @@ test('where', function () {
 
     self::assertCount(2, $collection);
 
+    $collection->each(function ($item) {
+        Log::info(json_encode($item));
+    });
+});
+
+test('whereBetween', function () {
+    $collection = DB::table('categories')
+        ->whereBetween('created_at', ['2020-09-10 10:10:10', '2020-11-10 10:10:10'])
+        ->get();
+
+    self::assertCount(4, $collection);
     $collection->each(function ($item) {
         Log::info(json_encode($item));
     });
