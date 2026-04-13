@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -14,30 +13,24 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         DB::table('categories')->insert([
-            [
-                'id' => 'SMARTPHONE',
-                'name' => 'Smartphone',
-                'description' => null,
-                'created_at' => '2020-10-10 10:10:10'
-            ],
-            [
-                'id' => 'LAPTOP',
-                'name' => 'Laptop',
-                'description' => null,
-                'created_at' => '2020-10-10 10:10:10'
-            ],
-            [
-                'id' => 'ACCESSORIES',
-                'name' => 'Accessories',
-                'description' => null,
-                'created_at' => '2020-10-10 10:10:10'
-            ],
-            [
-                'id' => 'OTHER',
-                'name' => 'Other',
-                'description' => null,
-                'created_at' => '2020-10-10 10:10:10'
-            ],
+            'id' => 'SMARTPHONE',
+            'name' => 'Smartphone',
+            'created_at' => '2020-10-10 10:10:10',
+        ]);
+        DB::table('categories')->insert([
+            'id' => 'FOOD',
+            'name' => 'Food',
+            'created_at' => '2020-10-10 10:10:10',
+        ]);
+        DB::table('categories')->insert([
+            'id' => 'LAPTOP',
+            'name' => 'Laptop',
+            'created_at' => '2020-10-10 10:10:10',
+        ]);
+        DB::table('categories')->insert([
+            'id' => 'FASHION',
+            'name' => 'Fashion',
+            'created_at' => '2020-10-10 10:10:10',
         ]);
     }
 }
