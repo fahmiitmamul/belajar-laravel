@@ -170,8 +170,8 @@ test('aggregate', function () {
     expect(DB::table('products')->count())->toBe(2);
     expect(DB::table('products')->min('price'))->toBe(18000000);
     expect(DB::table('products')->max('price'))->toBe(20000000);
-    expect(DB::table('products')->avg('price'))->toBe(19000000);
-    expect(DB::table('products')->sum('price'))->toBe(38000000);
+    expect(DB::table('products')->avg('price'))->toEqual(19000000);
+    expect(DB::table('products')->sum('price'))->toEqual(38000000);
 });
 
 test('group by', function () {
