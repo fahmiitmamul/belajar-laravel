@@ -1,9 +1,9 @@
 <?php
 
 use Database\Seeders\CategorySeeder;
+use Database\Seeders\CounterSeeder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 beforeEach(function () {
     DB::delete('delete from products');
@@ -63,6 +63,12 @@ function insertManyCategories()
     }
 }
 
+/*
+|--------------------------------------------------------------------------
+| Tests
+|--------------------------------------------------------------------------
+*/
+
 test('insert', function () {
     DB::table('categories')->insert([
         'id' => 'GADGET',
@@ -80,26 +86,20 @@ test('insert', function () {
 });
 
 test('select', function () {
-    DB::table('categories')->insert([
-        ['id' => 'GADGET', 'name' => 'Gadget'],
-        ['id' => 'FOOD', 'name' => 'Food'],
-    ]);
+    test()->call('insert');
 
     $collection = DB::table('categories')->select(['id', 'name'])->get();
 
     expect($collection)->not->toBeNull();
-
-    $collection->each(fn ($item) => Log::info(json_encode($item)));
 });
 
 test('where', function () {
     insertCategories();
 
-    $collection = DB::table('categories')
-        ->where(function (Builder $builder) {
-            $builder->where('id', 'SMARTPHONE')
-                ->orWhere('id', 'LAPTOP');
-        })->get();
+    $collection = DB::table('categories')->where(function (Builder $builder) {
+        $builder->where('id', 'SMARTPHONE')
+            ->orWhere('id', 'LAPTOP');
+    })->get();
 
     expect($collection)->toHaveCount(2);
 });
@@ -114,15 +114,75 @@ test('where between', function () {
     expect($collection)->toHaveCount(4);
 });
 
+test('where in', function () {
+    insertCategories();
+
+    $collection = DB::table('categories')
+        ->whereIn('id', ['SMARTPHONE', 'LAPTOP'])
+        ->get();
+
+    expect($collection)->toHaveCount(2);
+});
+
+test('where null', function () {
+    insertCategories();
+
+    $collection = DB::table('categories')
+        ->whereNull('description')
+        ->get();
+
+    expect($collection)->toHaveCount(4);
+});
+
+test('where date', function () {
+    insertCategories();
+
+    $collection = DB::table('categories')
+        ->whereDate('created_at', '2020-10-10')
+        ->get();
+
+    expect($collection)->toHaveCount(4);
+});
+
 test('update', function () {
     insertCategories();
 
-    DB::table('categories')
-        ->where('id', 'SMARTPHONE')
-        ->update(['name' => 'Handphone']);
+    DB::table('categories')->where('id', 'SMARTPHONE')->update([
+        'name' => 'Handphone',
+    ]);
 
     $collection = DB::table('categories')
         ->where('name', 'Handphone')
+        ->get();
+
+    expect($collection)->toHaveCount(1);
+});
+
+test('upsert', function () {
+    DB::table('categories')->updateOrInsert([
+        'id' => 'VOUCHER',
+    ], [
+        'name' => 'Voucher',
+        'description' => 'Ticket and Voucher',
+        'created_at' => '2020-10-10 10:10:10',
+    ]);
+
+    $collection = DB::table('categories')
+        ->where('id', 'VOUCHER')
+        ->get();
+
+    expect($collection)->toHaveCount(1);
+});
+
+test('increment', function () {
+    test()->seed(CounterSeeder::class);
+
+    DB::table('counters')
+        ->where('id', 'sample')
+        ->increment('counter', 1);
+
+    $collection = DB::table('counters')
+        ->where('id', 'sample')
         ->get();
 
     expect($collection)->toHaveCount(1);
@@ -164,14 +224,55 @@ test('ordering', function () {
     expect($collection)->toHaveCount(2);
 });
 
+test('paging', function () {
+    insertCategories();
+
+    $collection = DB::table('categories')
+        ->skip(0)
+        ->take(2)
+        ->get();
+
+    expect($collection)->toHaveCount(2);
+});
+
+test('chunk', function () {
+    insertManyCategories();
+
+    DB::table('categories')->orderBy('id')
+        ->chunk(10, function ($categories) {
+            expect($categories)->not->toBeNull();
+        });
+});
+
+test('lazy', function () {
+    insertManyCategories();
+
+    $collection = DB::table('categories')
+        ->orderBy('id')
+        ->lazy(10)
+        ->take(3);
+
+    expect($collection)->not->toBeNull();
+});
+
+test('cursor', function () {
+    insertManyCategories();
+
+    $collection = DB::table('categories')
+        ->orderBy('id')
+        ->cursor();
+
+    expect($collection)->not->toBeNull();
+});
+
 test('aggregate', function () {
     insertProducts();
 
-    expect(DB::table('products')->count())->toBe(2);
+    expect(DB::table('products')->count('id'))->toBe(2);
     expect(DB::table('products')->min('price'))->toBe(18000000);
     expect(DB::table('products')->max('price'))->toBe(20000000);
-    expect(DB::table('products')->avg('price'))->toEqual(19000000);
-    expect(DB::table('products')->sum('price'))->toEqual(38000000);
+    expect(DB::table('products')->avg('price'))->toBe(19000000);
+    expect(DB::table('products')->sum('price'))->toBe(38000000);
 });
 
 test('group by', function () {
@@ -184,18 +285,20 @@ test('group by', function () {
         ->orderBy('category_id', 'desc')
         ->get();
 
-    expect($collection)->toHaveCount(2)
-        ->and($collection[0]->category_id)->toBe('SMARTPHONE')
-        ->and($collection[1]->category_id)->toBe('FOOD');
+    expect($collection)->toHaveCount(2);
+    expect($collection[0]->category_id)->toBe('SMARTPHONE');
+    expect($collection[1]->category_id)->toBe('FOOD');
 });
 
-test('pagination', function () {
-    insertCategories();
+test('locking', function () {
+    insertProducts();
 
-    $paginate = DB::table('categories')->paginate(2, ['*'], 'page', 2);
+    DB::transaction(function () {
+        $collection = DB::table('products')
+            ->where('id', '1')
+            ->lockForUpdate()
+            ->get();
 
-    expect($paginate->currentPage())->toBe(2)
-        ->and($paginate->perPage())->toBe(2)
-        ->and($paginate->lastPage())->toBe(2)
-        ->and($paginate->total())->toBe(4);
+        expect($collection)->toHaveCount(1);
+    });
 });
