@@ -15,4 +15,11 @@ class Category extends Model
     public $incrementing = false;
 
     public $timestamps = true;
+
+    protected $fillable = [
+        'id',
+        'name',
+        'is_active',
+        'description',
+    ];
 }
