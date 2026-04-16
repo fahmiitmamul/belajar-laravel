@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Counter;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class CounterSeeder extends Seeder
 {
@@ -12,9 +12,9 @@ class CounterSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('counters')->insert([
-            'id' => 'sample',
-            'counter' => 0,
-        ]);
+        $counter = new Counter;
+        $counter->id = 'sample';
+        $counter->counter = 0;
+        $counter->save();
     }
 }

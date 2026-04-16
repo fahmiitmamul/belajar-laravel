@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ProductSeeder extends Seeder
 {
@@ -12,12 +12,12 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('products')->insert([
-            'id' => 'Product 1',
-            'name' => 'Product 1',
-            'description' => 'Product 1 Description',
-            'price' => 10000,
-            'category_id' => 'FOOD',
-        ]);
+        $product = new Product;
+        $product->id = 'Product 1';
+        $product->name = 'Product 1';
+        $product->description = 'Product 1 Description';
+        $product->price = 10000;
+        $product->category_id = 'FOOD';
+        $product->save();
     }
 }
