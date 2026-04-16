@@ -1,53 +1,253 @@
 <?php
 
 use App\Models\Category;
+use App\Models\Product;
+use App\Models\Scopes\IsActiveScope;
+use Database\Seeders\CategorySeeder;
+use Database\Seeders\CustomerSeeder;
+use Database\Seeders\ProductSeeder;
+use Database\Seeders\ReviewSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-test('Test Insert', function () {
+uses()->group('category');
+
+uses(RefreshDatabase::class);
+
+test('insert', function () {
     $category = new Category;
     $category->id = 'GADGET';
     $category->name = 'Gadget';
     $category->description = 'Gadget';
-    $result = $category->save();
 
-    self::assertTrue($result);
+    expect($category->save())->toBeTrue();
 });
 
-test('Test Insert Many', function () {
-    $category = [];
+test('insert_many', function () {
+    $categories = [];
+
     for ($i = 0; $i < 10; $i++) {
-        $category[] = [
-            'id' => 'GADGET'.$i,
-            'name' => 'Gadget'.$i,
-            'description' => 'Gadget'.$i,
+        $categories[] = [
+            'id' => "ID $i",
+            'name' => "Name $i",
+            'is_active' => true,
+            'description' => "Description $i",
         ];
     }
 
-    $result = Category::insert($category);
-    self::assertTrue($result);
-
-    $total = Category::count();
-
-    self::assertEquals(10, $total);
+    expect(Category::insert($categories))->toBeTrue();
+    expect(Category::count())->toBe(10);
 });
 
-test('Test Find', function () {
+test('find', function () {
     $this->seed(CategorySeeder::class);
 
     $category = Category::find('FOOD');
 
-    self::assertNotNull($category);
-    self::assertEquals('FOOD', $category->id);
-    self::assertEquals('Food', $category->name);
-    self::assertEquals('Food Category', $category->description);
+    expect($category)->not->toBeNull()
+        ->and($category->id)->toBe('FOOD')
+        ->and($category->name)->toBe('Food')
+        ->and($category->description)->toBe('Food Category');
 });
 
-test('Test Update', function () {
+test('update', function () {
     $this->seed(CategorySeeder::class);
 
-    $category = Category::query()->find('FOOD');
+    $category = Category::find('FOOD');
     $category->name = 'Food Updated';
-    $category->description = 'Food Category Updated';
-    $result = $category->save();
 
-    self::assertTrue($result);
+    expect($category->update())->toBeTrue();
+});
+
+test('select', function () {
+    for ($i = 0; $i < 5; $i++) {
+        Category::create([
+            'id' => "ID $i",
+            'name' => "Name $i",
+            'is_active' => true,
+        ]);
+    }
+
+    $categories = Category::whereNull('description')->get();
+
+    expect($categories)->toHaveCount(5);
+
+    $categories->each(function ($category) {
+        expect($category->description)->toBeNull();
+
+        $category->update([
+            'description' => 'Updated',
+        ]);
+    });
+});
+
+test('update many', function () {
+    $categories = [];
+
+    for ($i = 0; $i < 10; $i++) {
+        $categories[] = [
+            'id' => "ID $i",
+            'name' => "Name $i",
+            'is_active' => true,
+        ];
+    }
+
+    Category::insert($categories);
+
+    Category::whereNull('description')->update([
+        'description' => 'Updated',
+    ]);
+
+    expect(Category::where('description', 'Updated')->count())->toBe(10);
+});
+
+test('delete', function () {
+    $this->seed(CategorySeeder::class);
+
+    $category = Category::find('FOOD');
+
+    expect($category->delete())->toBeTrue();
+    expect(Category::count())->toBe(0);
+});
+
+test('delete many', function () {
+    $categories = [];
+
+    for ($i = 0; $i < 10; $i++) {
+        $categories[] = [
+            'id' => "ID $i",
+            'name' => "Name $i",
+            'is_active' => true,
+        ];
+    }
+
+    Category::insert($categories);
+
+    expect(Category::count())->toBe(10);
+
+    Category::whereNull('description')->delete();
+
+    expect(Category::count())->toBe(0);
+});
+
+test('create', function () {
+    $category = new Category([
+        'id' => 'FOOD',
+        'name' => 'Food',
+        'description' => 'Food Category',
+    ]);
+
+    $category->save();
+
+    expect($category->id)->not->toBeNull();
+});
+
+test('create using query builder', function () {
+    $category = Category::create([
+        'id' => 'FOOD',
+        'name' => 'Food',
+        'description' => 'Food Category',
+    ]);
+
+    expect($category->id)->not->toBeNull();
+});
+
+test('update mass', function () {
+    $this->seed(CategorySeeder::class);
+
+    $category = Category::find('FOOD');
+
+    $category->fill([
+        'name' => 'Food Updated',
+        'description' => 'Food Category Updated',
+    ])->save();
+
+    expect($category->id)->not->toBeNull();
+});
+
+test('global scope', function () {
+    Category::create([
+        'id' => 'FOOD',
+        'name' => 'Food',
+        'description' => 'Food Category',
+        'is_active' => false,
+    ]);
+
+    expect(Category::find('FOOD'))->toBeNull();
+
+    $category = Category::withoutGlobalScopes([IsActiveScope::class])->find('FOOD');
+
+    expect($category)->not->toBeNull();
+});
+
+test('one to many', function () {
+    $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+    $category = Category::find('FOOD');
+
+    expect($category)->not->toBeNull()
+        ->and($category->products)->toHaveCount(2);
+});
+
+test('one to many query', function () {
+    $category = Category::create([
+        'id' => 'FOOD',
+        'name' => 'Food',
+        'description' => 'Food Category',
+        'is_active' => true,
+    ]);
+
+    $product = new Product([
+        'id' => '1',
+        'name' => 'Product 1',
+        'description' => 'Description 1',
+    ]);
+
+    $category->products()->save($product);
+
+    expect($product->category_id)->not->toBeNull();
+});
+
+test('relationship query', function () {
+    $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+    $category = Category::find('FOOD');
+
+    expect($category->products)->toHaveCount(2);
+
+    $out = $category->products()->where('stock', '<=', 0)->get();
+
+    expect($out)->toHaveCount(2);
+});
+
+test('has many through', function () {
+    $this->seed([
+        CategorySeeder::class,
+        ProductSeeder::class,
+        CustomerSeeder::class,
+        ReviewSeeder::class,
+    ]);
+
+    $category = Category::find('FOOD');
+
+    expect($category->reviews)->toHaveCount(2);
+});
+
+test('querying relations', function () {
+    $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+    $category = Category::find('FOOD');
+
+    $products = $category->products()->where('price', 200)->get();
+
+    expect($products)->toHaveCount(1)
+        ->and($products[0]->id)->toBe('2');
+});
+
+test('aggregating relations', function () {
+    $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+    $category = Category::find('FOOD');
+
+    expect($category->products()->count())->toBe(2);
+    expect($category->products()->where('price', 200)->count())->toBe(1);
 });
