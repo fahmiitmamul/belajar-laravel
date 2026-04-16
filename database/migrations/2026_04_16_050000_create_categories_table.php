@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('id', 100)->nullable(false)->primary();
             $table->string('name', 100)->nullable(false);
             $table->string('description')->nullable(false);
-            $table->string('created_at')->nullable(false)->useCurrent();
+            $table->timestamps();
         });
     }
 

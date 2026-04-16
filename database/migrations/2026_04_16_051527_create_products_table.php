@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable(true);
             $table->integer('price')->nullable(false);
             $table->string('category_id', 100)->nullable(false);
-            $table->timestamp('created_at')->nullable(false)->useCurrent();
+            $table->timestamps();
 
             $table->foreign('category_id')->references('id')->on('categories');
         });
