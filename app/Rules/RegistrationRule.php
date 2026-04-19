@@ -36,5 +36,11 @@ class RegistrationRule implements DataAwareRule, ValidationRule, ValidatorAwareR
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         //
+        $password = $value;
+        $username = $this->data['username'];
+
+        if ($password == $username) {
+            $fail("$attribute must be different with username");
+        }
     }
 }
