@@ -167,3 +167,28 @@ test('TestValidatorCustomRules', function () {
     $message = $validator->getMessageBag();
     Log::info($message->toJson(JSON_PRETTY_PRINT));
 });
+
+test('TestValidatorCustomFunctionRule', function () {
+    $data = [
+        'username' => 'eko@pzn.com',
+        'password' => 'eko@pzn.com',
+    ];
+
+    $rules = [
+        'username' => ['required', 'email', 'max:100', function (string $attribute, string $value, Closure $fail) {
+            if (strtoupper($value) != $value) {
+                $fail("The field $attribute must be uppercase");
+            }
+        }],
+        'password' => ['required', 'min:6', 'max:20'],
+    ];
+
+    $validator = Validator::make($data, $rules);
+    self::assertNotNull($validator);
+
+    self::assertFalse($validator->passes());
+    self::assertTrue($validator->fails());
+
+    $message = $validator->getMessageBag();
+    Log::info($message->toJson(JSON_PRETTY_PRINT));
+});
