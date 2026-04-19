@@ -1,5 +1,6 @@
 <?php
 
+use App\Rules\Uppercase;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -134,4 +135,35 @@ test('TestValidatorInlineMessage', function () {
 
     self::assertFalse($validator->passes());
     self::assertTrue($validator->fails());
+
+    $message = $validator->getMessageBag();
+    Log::info($message->toJson(JSON_PRETTY_PRINT));
+});
+
+test('TestValidatorCustomRules', function () {
+    $data = [
+        'username' => 'eko@pzn.com',
+        'password' => 'eko@pzn.com',
+    ];
+
+    $rules = [
+        'username' => ['required', 'email', 'max:100', new Uppercase],
+        'password' => ['required', 'min:6', 'max:20'],
+    ];
+
+    $messages = [
+        'required' => ':attribute harus diisi',
+        'email' => ':attribute harus diisi',
+        'min' => ':attribute harus diisi',
+        'max' => ':attribute harus diisi',
+    ];
+
+    $validator = Validator::make($data, $rules, $messages);
+    self::assertNotNull($validator);
+
+    self::assertFalse($validator->passes());
+    self::assertTrue($validator->fails());
+
+    $message = $validator->getMessageBag();
+    Log::info($message->toJson(JSON_PRETTY_PRINT));
 });
