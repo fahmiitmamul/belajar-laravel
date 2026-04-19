@@ -192,3 +192,27 @@ test('TestValidatorCustomFunctionRule', function () {
     $message = $validator->getMessageBag();
     Log::info($message->toJson(JSON_PRETTY_PRINT));
 });
+
+test('TestValidationNestedArray', function () {
+    $data = [
+        'name' => [
+            'first' => 'eko',
+            'last' => 'pzn',
+        ],
+        'address' => [
+            'street' => 'jalan merdeka',
+            'city' => 'jakarta',
+            'country' => 'indonesia',
+        ],
+    ];
+
+    $rules = [
+        'name.first' => 'required',
+        'name.last' => 'required',
+        'address.city' => 'required',
+        'address.country' => 'required',
+    ];
+
+    $validator = Validator::make($data, $rules);
+    self::assertTrue($validator->passes());
+});
