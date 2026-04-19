@@ -36,4 +36,8 @@ test('TestValidatorInvalid', function () {
 
     self::assertFalse($validator->passes());
     self::assertTrue($validator->fails());
+
+    $message = $validator->getMessageBag();
+
+    Log::info($message->toJson(JSON_PRETTY_PRINT));
 });
