@@ -66,3 +66,21 @@ test('TestValidatorException', function () {
         Log::error($message->toJson(JSON_PRETTY_PRINT));
     }
 });
+
+test('TestValidatorMultipleRules', function () {
+    $data = [
+        'username' => 'eko',
+        'password' => 'eko',
+    ];
+
+    $rules = [
+        'username' => 'required|email|max:100',
+        'password' => ['required', 'min:6', 'max:20'],
+    ];
+
+    $validator = Validator::make($data, $rules);
+    self::assertNotNull($validator);
+
+    self::assertFalse($validator->passes());
+    self::assertTrue($validator->fails());
+});
