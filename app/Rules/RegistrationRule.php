@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Rules;
+
+use Closure;
+use Illuminate\Contracts\Validation\DataAwareRule;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\ValidatorAwareRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
+
+class RegistrationRule implements DataAwareRule, ValidationRule, ValidatorAwareRule
+{
+    private array $data;
+
+    public function setData($data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    public function setValidator(Validator $validator): RegistrationRule
+    {
+        $this->validator = $validator;
+
+        return $this;
+    }
+
+    /**
+     * Run the validation rule.
+     *
+     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        //
+    }
+}
