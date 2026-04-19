@@ -81,7 +81,7 @@ test('select', function () {
     });
 });
 
-test('update many', function () {
+test('update_many', function () {
     $categories = [];
 
     for ($i = 0; $i < 10; $i++) {
@@ -145,7 +145,7 @@ test('create', function () {
     expect($category->id)->not->toBeNull();
 });
 
-test('create using query builder', function () {
+test('create_using_query_builder', function () {
     $category = Category::create([
         'id' => 'FOOD',
         'name' => 'Food',
@@ -155,7 +155,7 @@ test('create using query builder', function () {
     expect($category->id)->not->toBeNull();
 });
 
-test('update mass', function () {
+test('update_mass', function () {
     $this->seed(CategorySeeder::class);
 
     $category = Category::find('FOOD');
@@ -168,7 +168,7 @@ test('update mass', function () {
     expect($category->id)->not->toBeNull();
 });
 
-test('global scope', function () {
+test('global_scope', function () {
     Category::create([
         'id' => 'FOOD',
         'name' => 'Food',
@@ -192,7 +192,7 @@ test('one to many', function () {
         ->and($category->products)->toHaveCount(2);
 });
 
-test('one to many query', function () {
+test('one_to_many_query', function () {
     $category = Category::create([
         'id' => 'FOOD',
         'name' => 'Food',
@@ -211,8 +211,8 @@ test('one to many query', function () {
     expect($product->category_id)->not->toBeNull();
 });
 
-test('relationship query', function () {
-    $this->seed([CategorySeeder::class, ProductSeeder::class]);
+test('relationship_query', function () {
+    $this->seed([CtegorySeeder::class, ProductSeeder::class]);
 
     $category = Category::find('FOOD');
 
@@ -223,7 +223,7 @@ test('relationship query', function () {
     expect($out)->toHaveCount(2);
 });
 
-test('has many through', function () {
+test('has_many_through', function () {
     $this->seed([
         CategorySeeder::class,
         ProductSeeder::class,
@@ -236,7 +236,7 @@ test('has many through', function () {
     expect($category->reviews)->toHaveCount(2);
 });
 
-test('querying relations', function () {
+test('querying_relations', function () {
     $this->seed([CategorySeeder::class, ProductSeeder::class]);
 
     $category = Category::find('FOOD');
@@ -247,7 +247,7 @@ test('querying relations', function () {
         ->and($products[0]->id)->toBe('2');
 });
 
-test('aggregating relations', function () {
+test('aggregating_relations', function () {
     $this->seed([CategorySeeder::class, ProductSeeder::class]);
 
     $category = Category::find('FOOD');
