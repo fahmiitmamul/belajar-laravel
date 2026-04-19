@@ -183,7 +183,7 @@ test('global_scope', function () {
     expect($category)->not->toBeNull();
 });
 
-test('one to many', function () {
+test('one_to_many', function () {
     $this->seed([CategorySeeder::class, ProductSeeder::class]);
 
     $category = Category::find('FOOD');
