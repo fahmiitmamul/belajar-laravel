@@ -68,6 +68,8 @@ test('TestValidatorException', function () {
 });
 
 test('TestValidatorMultipleRules', function () {
+    App::setLocale('id');
+
     $data = [
         'username' => 'eko',
         'password' => 'eko',
@@ -107,4 +109,29 @@ test('TestValidatorValidData', function () {
         $message = $exception->validator->errors();
         Log::error($message->toJson(JSON_PRETTY_PRINT));
     }
+});
+
+test('TestValidatorInlineMessage', function () {
+    $data = [
+        'username' => 'eko',
+        'password' => 'eko',
+    ];
+
+    $rules = [
+        'username' => 'required|email|max:100',
+        'password' => ['required', 'min:6', 'max:20'],
+    ];
+
+    $messages = [
+        'required' => ':attribute harus diisi',
+        'email' => ':attribute harus diisi',
+        'min' => ':attribute harus diisi',
+        'max' => ':attribute harus diisi',
+    ];
+
+    $validator = Validator::make($data, $rules, $messages);
+    self::assertNotNull($validator);
+
+    self::assertFalse($validator->passes());
+    self::assertTrue($validator->fails());
 });
