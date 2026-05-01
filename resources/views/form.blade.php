@@ -13,11 +13,9 @@
 @endif
 
 <form action="/form" method="post">
-    <label for="name">
-        <input type="text" name="name">
-    </label>
-    <input type="submit" value="Say Hello">
-    <input type="hidden" name="_token" value="{{csrf_token()}}">
+    @csrf
+    <label>Username : <input type="text" name="username"></label> <br>
+    <label>Password : <input type="text" name="username"></label> <br>
 </form>
 </body>
 </html>
