@@ -189,3 +189,8 @@ Route::controller(TodolistController::class)
 Route::get('/html-encoding', function (Request $request) {
     return view('html-encoding', ['name' => $request->input('name')]);
 });
+
+Route::get('/categories/{id}', function ($id){
+    $category = Category::findOrFail($id);
+    return new CategoryResource($category);
+});
