@@ -18,6 +18,9 @@ use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
+use App\Models\Category;
+use App\Http\Resources\CategoryResource;
+use App\Http\Resources\CategoryCollection;
 
 Route::get('/', [HomeController::class, 'home']);
 
@@ -193,4 +196,14 @@ Route::get('/html-encoding', function (Request $request) {
 Route::get('/categories/{id}', function ($id){
     $category = Category::findOrFail($id);
     return new CategoryResource($category);
+});
+
+Route::get('/categories', function (){
+    $categories = Category::all();
+    return CategoryResource::collection($categories);
+});
+
+Route::get('/categories-custom', function (){
+    $categories = Category::all();
+    return new CategoryCollection($categories);
 });
